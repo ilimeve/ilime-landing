@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ILIME — move different.</title>
+<meta name="description" content="ILIME. Roupas femininas fashion/activewear. move different.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+
+  /* ============================================================
+     CONFIGURAÇÃO RÁPIDA — edite aqui
+     Cores, fontes e espaçamentos base ficam nas variáveis abaixo.
+     Links de produtos e redes sociais ficam no <script> no final
+     do arquivo, dentro do objeto CONFIG.
+     ============================================================ */
+
+  :root{
+    --bege-claro: #EDCFA3;
+    --bege-areia: #DDB67E;
+    --preto: #18150F;
+    --preto-suave: #211D17;
+    --branco: #FFFFFF;
+    --texto-claro: #F5EFE3;
+    --texto-escuro: #18150F;
+    --texto-esc-suave: #4A453C;
+
+    --serif: 'DM Serif Display', serif;
+    --sans: 'Manrope', sans-serif;
+
+    --container: 1180px;
+    --gutter: 24px;
+  }
+
+  *{ margin:0; padding:0; box-sizing:border-box; }
+
+  html{ scroll-behavior:smooth; }
+
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior:auto; }
+    *{ animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important; }
+  }
+
+  body{
+    background:var(--bege-claro);
+    color:var(--texto-escuro);
+    font-family:var(--sans);
+    font-weight:400;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+
+  img{ display:block; max-width:100%; }
+
+  a{ color:inherit; text-decoration:none; }
+
+  button{ font-family:inherit; cursor:pointer; border:none; background:none; }
+
+  .wrap{
+    max-width:var(--container);
+    margin:0 auto;
+    padding:0 var(--gutter);
+  }
+
+  .serif{ font-family:var(--serif); font-weight:400; }
+
+  /* ------------------------------------------------------------
+     UTILITÁRIOS DE CONTRASTE
+     black  → usar sobre fundos claros (bege-claro / branco)
+     white  → usar sobre fundos escuros (preto / preto-suave)
+     beige  → uso pontual, conforme o contraste da seção
+     Aplicados a texto, logo e símbolo.
+     ------------------------------------------------------------ */
+  .on-black{ color:var(--preto); }
+  .on-white{ color:var(--texto-claro); }
+  .on-beige{ color:var(--bege-areia); }
+
+  /* ------------------------------------------------------------
+     SÍMBOLO EDITORIAL "M"
+     Detalhe de marca usado como acento visual (não é o logotipo).
+     Três variantes de asset: symbol-white.svg / symbol-black.svg /
+     symbol-beige.svg — com fallback tipográfico em itálico serifado
+     enquanto os arquivos reais não existem em /assets.
+     ------------------------------------------------------------ */
+  .symbol{
+    font-family:var(--serif);
+    font-style:italic;
+    line-height:1;
+    display:inline-block;
+    user-select:none;
+  }
+  .symbol img{ display:block; height:1em; width:auto; }
+  .symbol-black{ color:var(--preto); }
+  .symbol-white{ color:var(--texto-claro); }
+  .symbol-beige{ color:var(--bege-areia); }
+
+  .symbol-mark{
+    position:absolute;
+    pointer-events:none;
+    z-index:0;
+  }
+  .symbol-mark img{
+    display:block;
+    width:clamp(7rem,32vw,16rem);
+    height:auto;
+  }
+  .symbol-mark .fallback{
+    font-family:var(--serif);
+    font-style:italic;
+    line-height:1;
+    font-size:clamp(7rem,32vw,16rem);
+    display:block;
+  }
+
+  /* ------------------------------------------------------------
+     Placeholder de imagem — some automaticamente quando o
+     arquivo real existir em /assets. Serve só para visualização
+     enquanto os arquivos definitivos não são adicionados.
+     ------------------------------------------------------------ */
+  .img-box{
+    position:relative;
+    width:100%;
+    overflow:hidden;
+    background:var(--bege-areia);
+  }
+  .img-box img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
+  .img-box.placeholder{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border:1px dashed rgba(24,21,15,0.35);
+  }
+  .img-box.placeholder::after{
+    content:attr(data-file);
+    font-family:var(--sans);
+    font-size:12px;
+    font-weight:600;
+    letter-spacing:0.04em;
+    color:var(--texto-esc-suave);
+    text-align:center;
+    padding:0 12px;
+  }
+
+  /* ------------------------------------------------------------
+     NAV
+     ------------------------------------------------------------ */
+  header{
+    position:fixed;
+    top:0; left:0; right:0;
+    z-index:100;
+    padding:18px var(--gutter);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    
+  }
+  header .logo{
+    font-family:var(--serif);
+    font-size:22px;
+    color:var(--texto-claro);
+    letter-spacing:0.02em;
+  }
+  header .logo img{ height:26px; width:auto; }
+  .menu-btn{
+    width:40px; height:40px;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    gap:5px;
+  }
+  .menu-btn span{
+    width:22px; height:1.5px;
+    background:var(--texto-claro);
+    transition:transform 0.3s ease, opacity 0.3s ease;
+  }
+  .menu-btn.aberto span:nth-child(1){ transform:translateY(6.5px) rotate(45deg); }
+  .menu-btn.aberto span:nth-child(2){ opacity:0; }
+  .menu-btn.aberto span:nth-child(3){ transform:translateY(-6.5px) rotate(-45deg); }
+
+  .menu-overlay{
+    position:fixed; inset:0;
+    background:var(--preto);
+    z-index:90;
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    justify-content:center;
+    gap:22px;
+    padding:0 32px;
+    transform:translateY(-100%);
+    transition:transform 0.5s cubic-bezier(.65,0,.35,1);
+  }
+  .menu-overlay.aberto{ transform:translateY(0); }
+  .menu-overlay a{
+    font-family:var(--serif);
+    font-size:clamp(32px,9vw,56px);
+    color:var(--texto-claro);
+  }
+  .menu-overlay .menu-sub{
+    font-family:var(--sans);
+    font-size:14px;
+    color:var(--bege-areia);
+    margin-top:24px;
+  }
+  .menu-overlay .menu-sub a{
+    font-family:var(--sans);
+    font-size:14px;
+    color:var(--bege-areia);
+    margin-right:18px;
+    display:inline;
+  }
+
+  /* ------------------------------------------------------------
+     HERO
+     ------------------------------------------------------------ */
+  .hero{
+    background:var(--preto);
+    color:var(--texto-claro);
+    padding:96px 0 0;
+    position:relative;
+  }
+  .hero-top{
+    padding:0 var(--gutter) 28px;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+  .hero-eyebrow{
+    font-size:13px;
+    color:var(--bege-areia);
+    font-weight:600;
+  }
+  .hero h1{
+    font-family:var(--serif);
+    font-style:italic;
+    font-size:clamp(2.6rem,11vw,6.5rem);
+    line-height:0.98;
+    letter-spacing:-0.01em;
+  }
+  .hero-photo{
+    width:100%;
+    aspect-ratio:4/5;
+    opacity:0;
+    transform:scale(1.06);
+    animation:heroReveal 1.1s 0.15s cubic-bezier(.16,1,.3,1) forwards;
+  }
+  @media (prefers-reduced-motion: reduce){
+    .hero-photo{ opacity:1; transform:none; animation:none; }
+  }
+  @keyframes heroReveal{
+    to{ opacity:1; transform:scale(1); }
+  }
+  .hero-bottom{
+    padding:26px var(--gutter) 56px;
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .hero-bottom p{
+    max-width:340px;
+    font-size:15px;
+    color:var(--bege-areia);
+  }
+  .cta{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    font-size:14px;
+    font-weight:700;
+    letter-spacing:0.02em;
+    padding:15px 26px;
+    white-space:nowrap;
+  }
+  .cta-claro{
+    background:var(--texto-claro);
+    color:var(--preto);
+  }
+  .cta-escuro{
+    background:var(--preto);
+    color:var(--texto-claro);
+  }
+  .cta-outline{
+    border:1px solid currentColor;
+  }
+  .cta:hover{ opacity:0.85; }
+
+  /* ------------------------------------------------------------
+     SEÇÃO GENÉRICA
+     ------------------------------------------------------------ */
+  section{ padding:88px 0; }
+  .bg-bege{ background:var(--bege-claro); color:var(--texto-escuro); }
+  .bg-preto{ background:var(--preto); color:var(--texto-claro); }
+  .bg-branco{ background:var(--branco); color:var(--texto-escuro); }
+
+  .section-head{
+    padding:0 var(--gutter) 40px;
+    max-width:640px; color: rgb(146, 119, 60)
+  }
+  .section-head h2{
+    font-family:var(--serif);
+    font-size:clamp(2rem,6vw,3.4rem);
+    line-height:1.05;
+  }
+  .section-head p{
+    margin-top:14px;
+    font-size:15px;
+    max-width:46ch;
+  }
+  .bg-bege .section-head p, .bg-branco .section-head p{ color:var(--texto-esc-suave); }
+  .bg-preto .section-head p{ color:var(--bege-areia); }
+
+  /* Cabeçalho com etiqueta de coleção alinhada à direita — usado em Produtos */
+  .section-head.com-tag{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:10px 20px;
+    max-width:none;
+  }
+  .section-head.com-tag .titulo{ max-width:640px; }
+  .colecao-tag{
+    font-family:var(--sans);
+    font-size:11px;
+    font-weight:600;
+    letter-spacing:0.35em;
+    text-transform:uppercase;
+    color:var(--texto-esc-suave);
+    white-space:nowrap;
+    padding-bottom:6px;
+  }
+
+  /* ------------------------------------------------------------
+     PRODUTOS — grid simétrico responsivo (1 → 2 → 3 colunas)
+     ------------------------------------------------------------ */
+  .produtos-grid{
+    padding:0 var(--gutter);
+    display:grid;
+    grid-template-columns:1fr;
+    gap:44px 20px;
+  }
+  @media (min-width:560px){
+    .produtos-grid{ grid-template-columns:repeat(2,1fr); }
+  }
+  @media (min-width:900px){
+    .produtos-grid{ grid-template-columns:repeat(3,1fr); gap:52px 28px; }
+  }
+  .produto{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:16px;
+    text-align:center;
+  }
+  .produto .img-box{ aspect-ratio:3/4; width:100%; }
+
+  /* ------------------------------------------------------------
+     CARROSSEL — qualquer produto com 2+ imagens em
+     CONFIG.produtos[].imagens ganha carrossel. A etiqueta "ACTIVE"
+     só aparece quando categoria === 'active'.
+     ------------------------------------------------------------ */
+  .carrossel{
+    position:relative;
+    width:100%;
+    aspect-ratio:3/4;
+    overflow:hidden;
+    background:var(--bege-areia);
+    touch-action:pan-y;
+  }
+  .carrossel-slide{
+    position:absolute;
+    inset:0;
+    opacity:0;
+    transition:opacity 0.4s ease;
+  }
+  .carrossel-slide.ativo{
+    opacity:1;
+    z-index:1;
+  }
+  .carrossel-slide img{
+    width:100%; height:100%; object-fit:cover; display:block;
+  }
+  .carrossel-slide.placeholder{
+    display:flex; align-items:center; justify-content:center;
+    border:1px dashed rgba(24,21,15,0.35);
+  }
+  .carrossel-slide.placeholder::after{
+    content:attr(data-file);
+    font-size:11px; font-weight:600;
+    color:var(--texto-esc-suave);
+    text-align:center; padding:0 10px;
+  }
+  .carrossel-dots{
+    position:absolute;
+    bottom:12px; left:50%;
+    transform:translateX(-50%);
+    display:flex; gap:6px;
+    z-index:2;
+  }
+  .carrossel-dots button{
+    width:6px; height:6px; border-radius:50%;
+    background:rgba(245,239,227,0.5);
+    padding:0;
+  }
+  .carrossel-dots button.ativo{ background:var(--texto-claro); }
+  .carrossel-tag{
+    position:absolute;
+    top:12px; left:12px;
+    font-size:11px; font-weight:700;
+    letter-spacing:0.04em;
+    color:var(--texto-claro);
+    background:rgba(24,21,15,0.55);
+    padding:4px 9px;
+    z-index:2;
+  }
+  .produto-info{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:4px;
+  }
+  .produto-nome{
+    font-family:'Montserrat', sans-serif;
+     font-weight: 600;
+    font-size:26px;
+    line-height:1.15;
+  }
+  .produto-preco{
+    font-size:13px;
+    color:var(--texto-esc-suave);
+  }
+  .produto-link{
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:0.03em;
+    white-space:nowrap;
+    margin-top:4px;
+  }
+  .produto-link:hover{ text-decoration:underline; }
+
+  /* ------------------------------------------------------------
+     MARCA
+     ------------------------------------------------------------ */
+  .marca-layout{
+    padding:0 var(--gutter);
+    display:grid;
+    grid-template-columns:1fr;
+    gap:32px;
+    align-items:center;
+  }
+  .marca-img .img-box{ aspect-ratio:1/1; }
+  .marca-texto h3{
+    font-family:var(--serif);
+    font-style:italic;
+    font-size:clamp(2.1rem,7vw,3.2rem);
+    line-height:1.08;
+    margin-bottom:20px;
+  }
+  .marca-texto p{
+    font-size:15px;
+    color:var(--bege-areia);
+    max-width:42ch;
+  }
+
+  /* ------------------------------------------------------------
+     REDES
+     ------------------------------------------------------------ */
+  .redes-lista{
+    padding:0 var(--gutter);
+    display:flex;
+    flex-direction:column;
+    
+  }
+  .rede-item{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    padding:22px 0;
+    border-top:1px solid rgba(206, 160, 68, 0.15);
+    
+  }
+  .redes-lista .rede-item:last-child{ border-bottom:1px solid rgba(24, 15, 15, 0.15); }
+  .rede-nome{
+    font-family:var(--serif);
+    font-size:clamp(1.6rem,6vw,2.4rem);
+    
+  }
+  .rede-handle{
+    font-size:13px;
+    font-weight:600;
+    color: rgb(0, 0, 0);
+  }
+  .rede-item:hover .rede-nome{ font-style:italic;  }
+
+  /* ------------------------------------------------------------
+     CTA FINAL
+     ------------------------------------------------------------ */
+  .cta-final{
+    text-align:left;
+    padding-top:96px;
+    padding-bottom:96px;
+  }
+  .cta-final .wrap{ padding:0 var(--gutter); }
+  .cta-final h2{
+    font-family:var(--serif);
+    font-style:italic;
+    font-size:clamp(2.4rem,9vw,5rem);
+    line-height:1.02;
+    margin-bottom:36px;
+    max-width:14ch;
+  }
+
+  footer{
+    background:var(--preto);
+    color:var(--bege-areia);
+    padding:28px var(--gutter) 36px;
+    font-size:12px;
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:8px;
+    border-top:1px solid rgba(245,239,227,0.12);
+  }
+
+  /* ------------------------------------------------------------
+     DESKTOP
+     ------------------------------------------------------------ */
+  @media (min-width:760px){
+    .hero{ padding-top:120px; }
+    .hero-top{ padding-left:var(--gutter); padding-right:var(--gutter); }
+    .hero-photo{ aspect-ratio:16/8.5; }
+
+    .marca-layout{
+      grid-template-columns:1fr 1fr;
+      gap:0;
+    }
+    .marca-img{ order:2; }
+    .marca-texto{ order:1; padding-right:60px; }
+
+    .redes-lista{ max-width:720px; }
+
+    .cta-final .wrap{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:40px;
+    }
+    .cta-final h2{ margin-bottom:0; }
+  }
+
+</style>
+</head>
+<body>
+
+<header>
+  <a href="#topo" class="logo" aria-label="ILIME">
+    <!-- logo-ilime-white.png: a nav usa mix-blend-mode para se adaptar
+         a fundos claros e escuros automaticamente. logo-ilime-black.png
+         e logo-ilime-beige.png ficam disponíveis em /assets para uso
+         em outras seções fixas (ex: rodapé, marca) se preferir. -->
+    <img src="assets/logo-ilime-white.png" alt="ILIME"
+      onerror="this.parentElement.innerHTML='ILIME'">
+  </a>
+  <button class="menu-btn" id="menuBtn" aria-label="Abrir menu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+</header>
+
+<nav class="menu-overlay" id="menuOverlay">
+  <a href="#produtos">produtos</a>
+  <a href="#marca">marca</a>
+  <a href="#redes">redes</a>
+  <div class="menu-sub" id="menuSocial"></div>
+</nav>
+
+<main id="topo">
+
+  <!-- ============================================================
+       1. HERO
+       ============================================================ -->
+  <section class="hero" style="padding-bottom:0; position:relative; overflow:hidden;">
+    <span class="symbol-mark" style="top:64px; right:-10px; opacity:0.16;" aria-hidden="true">
+      <img src="assets/symbol-ilime-beige.png" alt=""
+        onerror="this.outerHTML='&lt;span class=&quot;fallback symbol-beige&quot;&gt;M&lt;/span&gt;'">
+    </span>
+
+    <div class="hero-top" style="position:relative; z-index:1;">
+      <span class="hero-eyebrow">ILIME</span>
+      <h1 class="serif">move different.</h1>
+    </div>
+
+    <div class="img-box hero-photo" data-file="assets/photo-01.jpg — foto principal do hero">
+      <img src="assets/photo-01.jpg" alt="Campanha ILIME"
+        onerror="this.parentElement.classList.add('placeholder'); this.remove();">
+    </div>
+
+    <div class="hero-bottom">
+      <p>Peças pensadas pra quem treina, trabalha e vive sem trocar de roupa — nem de atitude.</p>
+      <a href="#produtos" class="cta cta-claro">SHOP ILIME →</a>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       2. PRODUTOS
+       ============================================================ -->
+  <section class="bg-bege" id="produtos" style="position:relative; overflow:hidden;">
+    <span class="symbol-mark" style="top:-30px; right:-10px; opacity:0.08;" aria-hidden="true">
+      <img src="assets/symbol-ilime-black.png" alt=""
+        onerror="this.outerHTML='&lt;span class=&quot;fallback symbol-black&quot;&gt;M&lt;/span&gt;'">
+    </span>
+
+    <div class="section-head com-tag" style="position:relative; z-index:1;">
+      <div class="titulo">
+        <h2 class="serif">peças da coleção</h2>
+        <p>Feitas pra se mover com você — do treino ao final de semana.</p>
+      </div>
+      <span class="colecao-tag" id="colecaoTag"></span>
+    </div>
+
+    <div class="produtos-grid" id="produtosGrid" style="position:relative; z-index:1;"></div>
+  </section>
+
+  <!-- ============================================================
+       3. MARCA
+       ============================================================ -->
+  <section class="bg-preto" id="marca" style="position:relative; overflow:hidden;">
+    <span class="symbol-mark" style="bottom:-40px; left:-20px; opacity:0.16;" aria-hidden="true">
+      <img src="assets/symbol-ilime-white.png" alt=""
+        onerror="this.outerHTML='&lt;span class=&quot;fallback symbol-white&quot;&gt;M&lt;/span&gt;'">
+    </span>
+
+    <div class="marca-layout" style="position:relative; z-index:1;">
+      <div class="marca-texto">
+        <span class="symbol" style="display:block; margin-bottom:8px;" aria-hidden="true">
+          <img src="assets/symbol-ilime-beige.png" alt="" style="height:34px; width:auto;"
+            onerror="this.outerHTML='&lt;span class=&quot;symbol-beige&quot; style=&quot;font-size:34px;&quot;&gt;M&lt;/span&gt;'">
+        </span>
+        <h3 class="serif">vem viver a nossa vibe ✦</h3>
+        <p>ILIME nasceu pra quem não cabe em um único rótulo. Roupas que acompanham o seu ritmo, com caimento, conforto e uma estética que é só sua.</p>
+      </div>
+      <div class="marca-img">
+        <div class="img-box" data-file="assets/photo-02.jpg — foto de marca/lifestyle">
+          <img src="assets/photo-02.jpg" alt="ILIME lifestyle"
+            onerror="this.parentElement.classList.add('placeholder'); this.remove();">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       4. REDES
+       ============================================================ -->
+  <section class="bg-branco" id="redes">
+    <div class="section-head">
+      <h2 class="serif">nos encontre por aí</h2>
+    </div>
+    <div class="redes-lista" id="redesLista"></div>
+  </section>
+
+  <!-- ============================================================
+       5. CTA FINAL
+       ============================================================ -->
+  <section class="bg-preto cta-final" style="position:relative; overflow:hidden;">
+    <span class="symbol-mark" style="bottom:-50px; right:-10px; opacity:0.14;" aria-hidden="true">
+      <img src="assets/symbol-ilime-beige.png" alt=""
+        onerror="this.outerHTML='&lt;span class=&quot;fallback symbol-beige&quot;&gt;M&lt;/span&gt;'">
+    </span>
+    <div class="wrap" style="position:relative; z-index:1;">
+      <h2 class="serif">ready to<br>move different?</h2>
+      <a href="#produtos" class="cta cta-escuro cta-outline">SHOP ILIME →</a>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <span>ILIME © 2026</span>
+  <span>roupas femininas · fashion / activewear</span>
+</footer>
+
+<script>
+
+  /* ============================================================
+     CONFIG — edite aqui para atualizar produtos e redes sociais
+     sem mexer no resto do código.
+
+     PRODUTOS
+     - imagem: caminho do arquivo dentro de /assets
+     - nome: nome da peça (aparece na página)
+     - preco: opcional, string já formatada (ex: "R$ 219,90")
+     - link: URL de compra do produto
+
+     Para adicionar uma nova peça, basta adicionar um novo objeto
+     no array abaixo. A grade se ajusta sozinha.
+     ============================================================ */
+
+  /* Cada produto:
+     - imagens: array com 1 ou mais caminhos em /assets (a primeira
+       é usada como capa quando não é ACTIVE ou quando há só uma).
+     - categoria: só define a etiqueta "ACTIVE" no canto do carrossel.
+       Qualquer produto com 2+ imagens em "imagens" ganha carrossel
+       com dots, independente da categoria.
+     - nome, preco (opcional) e link seguem editáveis livremente.
+     Adicionar ou remover um produto = editar apenas este array. */
+  const CONFIG = {
+    // Nome da coleção em destaque, mostrado como etiqueta ao lado
+    // do título "peças da coleção". Troque aqui quando lançar uma
+    // coleção nova — não precisa mexer em mais nada.
+    colecaoAtual: 'Eclipse Collection',
+
+    produtos: [
+      // ---- linha ACTIVE: 3 fotos cada, carrossel automático ----
+      { imagens:['assets/velvetactive-fullbody.jpg','assets/velvetactive-closeup.jpg','assets/velvetactive-close.jpg'],
+        nome:'Velvet Active', categoria:'active', preco:'R$ 119,90', link:'#' },
+      { imagens:['assets/energyactive-fullbody.jpg','assets/energyactive-closeup.jpg','assets/energyactive-close.jpg'],
+        nome:'Energy Active', categoria:'active', preco:'R$ 139,90', link:'#' },
+      { imagens:['assets/haloactive-fullbody.jpg','assets/haloactive-closeup.jpg','assets/haloactive-close.jpg'],
+        nome:'Halo Active', categoria:'active', preco:'R$ 139,90', link:'#' },
+      { imagens:['assets/mistactive-fullbody.jpg','assets/mistactive-closeup.jpg','assets/mistactive-close.jpg'],
+        nome:'Mist Active', categoria:'active', preco:'R$ 139,90', link:'https://wa.me/p/36539297698994590/554196144683' },
+      { imagens:['assets/eclipseactive-fullbody.jpg','assets/eclipseactive-closeup.jpg','assets/eclipseactive-close.jpg'],
+        nome:'Eclipse Active', categoria:'active', preco:'R$ 139,90', link:'https://wa.me/p/26073725495637325/554196144683' },
+      { imagens:['assets/noiractive-fullbody.jpg','assets/noiractive-closeup.jpg','assets/noiractive-close.jpg'],
+        nome:'Noir Active', categoria:'active', preco:'R$ 139,90', link:'https://wa.me/p/36854661667510986/554196144683' },
+      { imagens:['assets/sunsetactive-fullbody.jpg','assets/sunsetactive-closeup.jpg','assets/sunsetactive-close.jpg'],
+        nome:'Sunset Active', categoria:'active', preco:'R$ 139,90', link:'https://wa.me/p/27014602221496092/554196144683' },
+
+      // ---- peças editoriais: capa fixa (sem carrossel) ----
+      { imagens:['assets/ilimejacket-black-front.jpg','assets/ilimejacket-black-open.jpg','assets/ilimejacket-black-back.jpg'],
+        nome:'Jaqueta ILIME — Preta', categoria:'editorial', preco:'R$ 59,90', link:'#' },
+      { imagens:['assets/ilimejacket-beige-front.jpg','assets/ilimejacket-beige-open.jpg','assets/ilimejacket-beige-back.jpg'],
+        nome:'Jaqueta ILIME — Bege', categoria:'editorial', preco:'R$ 59,90', link:'#' },
+      { imagens:['assets/auratshirt-front.jpg','assets/auratshirt-mixed.jpg','assets/auratshirt-back.jpg'],
+        nome:'Aura T-Shirt', categoria:'editorial', preco:'R$ 49,90', link:'https://wa.me/p/27678661048392295/554196144683' },
+      { imagens:['assets/aurabasic-shirt.jpg'],
+        nome:'Aura Basic', categoria:'editorial', preco:'R$ 35', link:'https://wa.me/p/27127287743592466/554196144683' },
+      { imagens:['assets/noirjumpsuit-fullbody.jpg','assets/noirjumpsuit-close.jpg'],
+        nome:'Noir Jumpsuit', categoria:'editorial', preco:'R$ 149,90', link:'https://wa.me/p/26627159790294658/554196144683' },
+    ],
+
+    redes: [
+      { nome:'Instagram', handle:'@ilime.ve', link:'https://instagram.com/ilime.ve' },
+      { nome:'TikTok',    handle:'@ilimeve', link:'https://tiktok.com/@ilimeve' },
+      { nome:'WhatsApp',  handle:'fale com a gente', link:'https://wa.me/message/FWNB3AFYT2STG1' },
+    ]
+  };
+
+  // ---------- Renderiza produtos ----------
+  const produtosGrid = document.getElementById('produtosGrid');
+
+  function criarMediaProduto(p){
+    const isActive = (p.categoria || '').toLowerCase() === 'active';
+    const imagens = p.imagens && p.imagens.length ? p.imagens : ['assets/produto-placeholder.jpg'];
+
+    // Produto sem carrossel: só a primeira imagem (quando há só 1 foto).
+    if(imagens.length < 2){
+      const img = imagens[0];
+      const box = document.createElement('div');
+      box.className = 'img-box';
+      box.setAttribute('data-file', img);
+      box.innerHTML = `<img src="${img}" alt="${p.nome}">`;
+      box.querySelector('img').addEventListener('error', function(){
+        box.classList.add('placeholder');
+        this.remove();
+      });
+      return box;
+    }
+
+    // Produto ACTIVE com 2+ imagens: carrossel com dots e swipe.
+    const carrossel = document.createElement('div');
+    carrossel.className = 'carrossel';
+    carrossel.innerHTML = `
+      ${isActive ? '<span class="carrossel-tag">ACTIVE</span>' : ''}
+      ${imagens.map((img, i) => `
+        <div class="carrossel-slide${i===0 ? ' ativo' : ''}" data-file="${img}">
+          <img src="${img}" alt="${p.nome}">
+        </div>
+      `).join('')}
+      <div class="carrossel-dots">
+        ${imagens.map((_, i) => `<button data-i="${i}" class="${i===0?'ativo':''}" aria-label="Foto ${i+1} de ${p.nome}"></button>`).join('')}
+      </div>
+    `;
+
+    carrossel.querySelectorAll('.carrossel-slide img').forEach(img => {
+      img.addEventListener('error', function(){
+        this.parentElement.classList.add('placeholder');
+        this.remove();
+      });
+    });
+
+    const slides = [...carrossel.querySelectorAll('.carrossel-slide')];
+    const dots = [...carrossel.querySelectorAll('.carrossel-dots button')];
+    let indice = 0;
+
+    function irPara(i){
+      indice = ((i % imagens.length) + imagens.length) % imagens.length; // navegação circular
+      slides.forEach((s, si) => s.classList.toggle('ativo', si === indice));
+      dots.forEach((d, di) => d.classList.toggle('ativo', di === indice));
+    }
+    dots.forEach(d => d.addEventListener('click', () => irPara(Number(d.dataset.i))));
+
+    let startX = 0;
+    carrossel.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, { passive:true });
+    carrossel.addEventListener('touchend', e => {
+      const deltaX = e.changedTouches[0].clientX - startX;
+      if(Math.abs(deltaX) > 40){ irPara(indice + (deltaX < 0 ? 1 : -1)); }
+    }, { passive:true });
+
+    return carrossel;
+  }
+
+  // ---------- Etiqueta da coleção em destaque ----------
+  const colecaoTagEl = document.getElementById('colecaoTag');
+  if(colecaoTagEl) colecaoTagEl.textContent = CONFIG.colecaoAtual || '';
+
+  CONFIG.produtos.forEach(p => {
+    const card = document.createElement('div');
+    card.className = 'produto';
+
+    const media = criarMediaProduto(p);
+
+    const info = document.createElement('div');
+    info.className = 'produto-info';
+    info.innerHTML = `
+      <div class="produto-nome serif">${p.nome}</div>
+      ${p.preco ? `<div class="produto-preco">${p.preco}</div>` : ''}
+      <a class="produto-link" href="${p.link}">VER PRODUTO →</a>
+    `;
+
+    card.appendChild(media);
+    card.appendChild(info);
+    produtosGrid.appendChild(card);
+  });
+
+  // ---------- Renderiza redes ----------
+  const redesLista = document.getElementById('redesLista');
+  const menuSocial = document.getElementById('menuSocial');
+  CONFIG.redes.forEach(r => {
+    const item = document.createElement('a');
+    item.className = 'rede-item';
+    item.href = r.link;
+    item.target = '_blank';
+    item.rel = 'noopener';
+    item.innerHTML = `<span class="rede-nome serif">${r.nome}</span><span class="rede-handle">${r.handle}</span>`;
+    redesLista.appendChild(item);
+
+    const menuLink = document.createElement('a');
+    menuLink.href = r.link;
+    menuLink.target = '_blank';
+    menuLink.rel = 'noopener';
+    menuLink.textContent = r.nome;
+    menuSocial.appendChild(menuLink);
+  });
+
+  // ---------- Menu mobile ----------
+  const menuBtn = document.getElementById('menuBtn');
+  const menuOverlay = document.getElementById('menuOverlay');
+  menuBtn.addEventListener('click', () => {
+    const aberto = menuOverlay.classList.toggle('aberto');
+    menuBtn.classList.toggle('aberto', aberto);
+    menuBtn.setAttribute('aria-expanded', aberto);
+    document.body.style.overflow = aberto ? 'hidden' : '';
+  });
+  menuOverlay.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => {
+      menuOverlay.classList.remove('aberto');
+      menuBtn.classList.remove('aberto');
+      document.body.style.overflow = '';
+    });
+  });
+
+</script>
+
+</body>
+</html>
