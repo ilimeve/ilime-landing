@@ -258,83 +258,6 @@
   @keyframes heroReveal{
     to{ opacity:1; transform:scale(1); }
   }
-
-  /* ------------------------------------------------------------
-     HERO — CARROSSEL DE MÍDIA (fotos + vídeo principal)
-     Troca automática entre pelo menos 5 fotos e 1 vídeo.
-     Configurável em HERO_MEDIA, no <script> no final do arquivo.
-     ------------------------------------------------------------ */
-  .hero-media{
-    position:relative;
-    width:100%;
-    aspect-ratio:3/2;
-    overflow:hidden;
-    background:var(--bege-areia);
-    opacity:0;
-    transform:scale(1.06);
-    animation:heroReveal 1.1s 0.15s cubic-bezier(.16,1,.3,1) forwards;
-    touch-action:pan-y;
-  }
-  @media (prefers-reduced-motion: reduce){
-    .hero-media{ opacity:1; transform:none; animation:none; }
-  }
-  .hero-slide{
-    position:absolute;
-    inset:0;
-    opacity:0;
-    transition:opacity 0.7s ease;
-  }
-  .hero-slide.ativo{
-    opacity:1;
-    z-index:1;
-  }
-  .hero-slide img,
-  .hero-slide video{
-    width:100%; height:100%; object-fit:cover; display:block;
-  }
-  .hero-slide.placeholder{
-    display:flex; align-items:center; justify-content:center;
-    border:1px dashed rgba(245,239,227,0.35);
-  }
-  .hero-slide.placeholder::after{
-    content:attr(data-file);
-    font-family:var(--sans);
-    font-size:12px;
-    font-weight:600;
-    letter-spacing:0.04em;
-    color:var(--texto-claro);
-    text-align:center;
-    padding:0 12px;
-  }
-  .hero-video-tag{
-    position:absolute;
-    top:12px; left:12px;
-    display:flex; align-items:center; gap:5px;
-    font-size:11px; font-weight:700;
-    letter-spacing:0.04em;
-    color:var(--texto-claro);
-    background:rgba(24,21,15,0.55);
-    padding:4px 9px;
-    z-index:2;
-  }
-  .hero-dots{
-    position:absolute;
-    bottom:14px; left:50%;
-    transform:translateX(-50%);
-    display:flex; gap:6px;
-    z-index:2;
-  }
-  .hero-dots button{
-    width:6px; height:6px; border-radius:50%;
-    background:rgba(245,239,227,0.5);
-    padding:0;
-    transition:width 0.3s ease, border-radius 0.3s ease, background 0.3s ease;
-  }
-  .hero-dots button.ativo{
-    background:var(--texto-claro);
-    width:18px;
-    border-radius:3px;
-  }
   .hero-bottom{
     padding:26px var(--gutter) 56px;
     display:flex;
@@ -466,6 +389,9 @@
   }
   .carrossel-slide img{
     width:100%; height:100%; object-fit:cover; display:block;
+  }
+  .carrossel-slide a{
+    display:block; width:100%; height:100%;
   }
   .carrossel-slide.placeholder{
     display:flex; align-items:center; justify-content:center;
@@ -676,9 +602,7 @@
       <h1 class="serif">move different.</h1>
     </div>
 
-    <div class="hero-media" id="heroMedia" aria-label="Galeria ILIME: fotos e vídeo da campanha">
-      <!-- Slides (vídeo + fotos) gerados via JS a partir de HERO_MEDIA, no final do arquivo -->
-    </div>
+    <div class="img-box hero-photo" id="heroMedia"></div>
 
     <div class="hero-bottom">
       <p>Peças pensadas pra quem treina, trabalha e vive sem trocar de roupa — nem de atitude.</p>
@@ -788,30 +712,18 @@
        com dots, independente da categoria.
      - nome, preco (opcional) e link seguem editáveis livremente.
      Adicionar ou remover um produto = editar apenas este array. */
-  /* ============================================================
-     HERO — mídia do topo (galeria automática + vídeo principal)
-     Edite HERO_MEDIA para trocar as fotos/vídeo do hero.
-
-     - type: 'video' ou 'imagem'
-     - arquivo: caminho dentro de /assets
-     - poster (só no vídeo, opcional): capa exibida antes de tocar
-
-     O vídeo toca automaticamente (mudo) e avança pro próximo assim
-     que termina. Cada foto fica visível por heroIntervalo (ms)
-     antes de trocar sozinha. Adicione quantas fotos quiser — o
-     carrossel e os pontinhos se ajustam sozinhos.
-     ============================================================ */
-  const HERO_MEDIA = [
-    { type:'video',  arquivo:'assets/hero-video.mp4', poster:'assets/photo-01.jpg' },
-    { type:'imagem', arquivo:'assets/photo-01.jpg' },
-    { type:'imagem', arquivo:'assets/photo-02.jpg' },
-    { type:'imagem', arquivo:'assets/photo-03.jpg' },
-    { type:'imagem', arquivo:'assets/photo-04.jpg' },
-    { type:'imagem', arquivo:'assets/photo-05.jpg' },
-  ];
-  const heroIntervalo = 4000; // tempo (ms) que cada foto fica visível antes de trocar
-
   const CONFIG = {
+    // Mídia do hero — lista de imagens exibidas em sequência (fade).
+    // Se "link" tiver uma URL, a imagem fica clicável e redireciona
+    // ao ser clicada. A ordem no array é a ordem de exibição —
+    // a primeira aparece primeiro.
+    hero: {
+      imagens: [
+        { imagem:'assets/hero-promo.jpg', link:'https://instagram.com/ilime.ve' },
+        { imagem:'assets/photo-01.jpg', link:'' },
+      ]
+    },
+
     // Nome da coleção em destaque, mostrado como etiqueta ao lado
     // do título "peças da coleção". Troque aqui quando lançar uma
     // coleção nova — não precisa mexer em mais nada.
@@ -854,113 +766,54 @@
     ]
   };
 
-  // ---------- Hero: carrossel de mídia (fotos + vídeo principal) ----------
-  function initHero(){
-    const container = document.getElementById('heroMedia');
-    if(!container || !HERO_MEDIA.length) return;
+  // ---------- Renderiza mídia do hero (com link clicável opcional) ----------
+  const heroMedia = document.getElementById('heroMedia');
+  if(heroMedia && CONFIG.hero && CONFIG.hero.imagens && CONFIG.hero.imagens.length){
+    const itens = CONFIG.hero.imagens;
 
-    let indice = 0;
-    let timer = null;
-
-    const slides = HERO_MEDIA.map((item, i) => {
+    itens.forEach((item, i) => {
       const slide = document.createElement('div');
-      slide.className = 'hero-slide' + (i === 0 ? ' ativo' : '');
-      slide.setAttribute('data-file', item.arquivo);
+      slide.className = 'carrossel-slide' + (i === 0 ? ' ativo' : '');
+      slide.setAttribute('data-file', item.imagem);
 
-      let midia;
-      if(item.type === 'video'){
-        const tag = document.createElement('span');
-        tag.className = 'hero-video-tag';
-        tag.textContent = '▶ vídeo';
-        slide.appendChild(tag);
+      const img = `<img src="${item.imagem}" alt="Campanha ILIME">`;
+      slide.innerHTML = item.link
+        ? `<a href="${item.link}" target="_blank" rel="noopener" aria-label="Ver mais">${img}</a>`
+        : img;
 
-        midia = document.createElement('video');
-        midia.src = item.arquivo;
-        if(item.poster) midia.poster = item.poster;
-        // Setadas como propriedade (não só atributo) — é o jeito
-        // confiável de garantir autoplay mudo em todos os navegadores.
-        midia.muted = true;
-        midia.defaultMuted = true;
-        midia.playsInline = true;
-        midia.setAttribute('muted', '');
-        midia.setAttribute('playsinline', '');
-        midia.setAttribute('webkit-playsinline', '');
-        midia.preload = 'auto';
-      } else {
-        midia = document.createElement('img');
-        midia.src = item.arquivo;
-        midia.alt = 'Campanha ILIME';
-      }
-      slide.appendChild(midia);
-
-      midia.addEventListener('error', function(){
+      slide.querySelector('img').addEventListener('error', function(){
         slide.classList.add('placeholder');
-        this.remove();
+        this.closest('a') ? this.closest('a').remove() : this.remove();
       });
 
-      container.appendChild(slide);
-      return slide;
+      heroMedia.appendChild(slide);
     });
 
-    const dotsWrap = document.createElement('div');
-    dotsWrap.className = 'hero-dots';
-    dotsWrap.innerHTML = HERO_MEDIA.map((_, i) =>
-      `<button data-i="${i}" class="${i===0 ? 'ativo' : ''}" aria-label="Mídia ${i+1} de ${HERO_MEDIA.length}"></button>`
-    ).join('');
-    container.appendChild(dotsWrap);
-    const dots = [...dotsWrap.querySelectorAll('button')];
+    if(itens.length > 1){
+      const dots = document.createElement('div');
+      dots.className = 'carrossel-dots';
+      dots.innerHTML = itens.map((_, i) => `<button data-i="${i}" class="${i===0?'ativo':''}" aria-label="Imagem ${i+1}"></button>`).join('');
+      heroMedia.appendChild(dots);
 
-    function pararVideos(){
-      slides.forEach(s => {
-        const v = s.querySelector('video');
-        if(v){ v.pause(); v.currentTime = 0; v.onended = null; }
-      });
-    }
+      const slides = [...heroMedia.querySelectorAll('.carrossel-slide')];
+      const dotEls = [...dots.querySelectorAll('button')];
+      let indice = 0;
 
-    function agendarProximo(){
-      const atual = HERO_MEDIA[indice];
-      const slideAtual = slides[indice];
-      const video = slideAtual.querySelector('video');
-
-      if(atual.type === 'video' && video){
-        // Vídeo principal: toca e avança sozinho quando termina.
-        try{ video.currentTime = 0; }catch(e){}
-        const tentativa = video.play();
-        if(tentativa && typeof tentativa.catch === 'function'){
-          tentativa.catch(err => {
-            console.warn('Hero: autoplay do vídeo foi bloqueado pelo navegador.', err);
-            // autoplay bloqueado — segue como se fosse foto
-            timer = setTimeout(() => irPara(indice + 1), heroIntervalo);
-          });
-        }
-        video.onended = () => irPara(indice + 1);
-      } else {
-        // Foto (ou vídeo não encontrado): troca sozinha após heroIntervalo.
-        timer = setTimeout(() => irPara(indice + 1), heroIntervalo);
+      function heroIrPara(i){
+        indice = ((i % itens.length) + itens.length) % itens.length;
+        slides.forEach((s, si) => s.classList.toggle('ativo', si === indice));
+        dotEls.forEach((d, di) => d.classList.toggle('ativo', di === indice));
       }
+      dotEls.forEach(d => d.addEventListener('click', () => heroIrPara(Number(d.dataset.i))));
+
+      let startX = 0;
+      heroMedia.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, { passive:true });
+      heroMedia.addEventListener('touchend', e => {
+        const deltaX = e.changedTouches[0].clientX - startX;
+        if(Math.abs(deltaX) > 40){ heroIrPara(indice + (deltaX < 0 ? 1 : -1)); }
+      }, { passive:true });
     }
-
-    function irPara(i){
-      clearTimeout(timer);
-      pararVideos();
-      indice = ((i % HERO_MEDIA.length) + HERO_MEDIA.length) % HERO_MEDIA.length;
-      slides.forEach((s, si) => s.classList.toggle('ativo', si === indice));
-      dots.forEach((d, di) => d.classList.toggle('ativo', di === indice));
-      agendarProximo();
-    }
-
-    dots.forEach(d => d.addEventListener('click', () => irPara(Number(d.dataset.i))));
-
-    let startX = 0;
-    container.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, { passive:true });
-    container.addEventListener('touchend', e => {
-      const deltaX = e.changedTouches[0].clientX - startX;
-      if(Math.abs(deltaX) > 40){ irPara(indice + (deltaX < 0 ? 1 : -1)); }
-    }, { passive:true });
-
-    agendarProximo();
   }
-  initHero();
 
   // ---------- Renderiza produtos ----------
   const produtosGrid = document.getElementById('produtosGrid');
