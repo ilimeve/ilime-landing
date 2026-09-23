@@ -157,7 +157,8 @@
     position:fixed;
     top:0; left:0; right:0;
     z-index:100;
-    padding:18px var(--gutter);
+    height:76px;
+    padding:0 var(--gutter);
     display:flex;
     align-items:center;
     justify-content:space-between;
@@ -593,7 +594,7 @@
   @media (max-width:479px){
     :root{ --gutter:18px; }
     section{ padding:56px 0; }
-    .hero{ padding-top:80px; }
+    .hero{ padding-top:100px; }
     .hero-top{ padding-bottom:20px; }
     .hero h1{ font-size:clamp(2.2rem,13vw,3.2rem); }
     .hero-bottom{ padding-top:20px; padding-bottom:40px; }
@@ -830,7 +831,12 @@
       const slide = document.createElement('div');
       const isVideo = item.tipo === 'video';
       slide.className = 'carrossel-slide' + (i === 0 ? ' ativo' : '');
-      slide.setAttribute('data-file', item.imagem);
+      // Se houver versão mobile, o rótulo de diagnóstico mostra os dois
+      // caminhos (não dá pra saber por CSS puro qual das duas falhou),
+      // assim fica claro qual arquivo conferir em cada tamanho de tela.
+      slide.setAttribute('data-file', item.mobile
+        ? `desktop: ${item.imagem}  ·  mobile: ${item.mobile}`
+        : item.imagem);
 
       const midia = isVideo
         ? `<video src="${item.imagem}" autoplay muted loop playsinline></video>`
