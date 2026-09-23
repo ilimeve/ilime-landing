@@ -161,7 +161,7 @@
     display:flex;
     align-items:center;
     justify-content:space-between;
-    
+    mix-blend-mode:difference;
   }
   header .logo{
     font-family:var(--serif);
@@ -387,7 +387,8 @@
     opacity:1;
     z-index:1;
   }
-  .carrossel-slide img{
+  .carrossel-slide img,
+  .carrossel-slide video{
     width:100%; height:100%; object-fit:cover; display:block;
   }
   .carrossel-slide a{
@@ -426,6 +427,24 @@
     padding:4px 9px;
     z-index:2;
   }
+  .carrossel-arrow{
+    position:absolute;
+    top:50%;
+    transform:translateY(-50%);
+    width:32px; height:32px;
+    display:flex; align-items:center; justify-content:center;
+    border-radius:50%;
+    background:rgba(24,21,15,0.45);
+    color:var(--texto-claro);
+    font-family:var(--sans);
+    font-size:16px;
+    line-height:1;
+    z-index:2;
+    transition:background 0.2s ease;
+  }
+  .carrossel-arrow:hover{ background:rgba(24,21,15,0.7); }
+  .carrossel-arrow.prev{ left:8px; }
+  .carrossel-arrow.next{ right:8px; }
   .produto-info{
     display:flex;
     flex-direction:column;
@@ -486,11 +505,12 @@
   }
   .rede-item{
     display:flex;
+    flex-wrap:wrap;
     align-items:baseline;
     justify-content:space-between;
+    gap:4px 12px;
     padding:22px 0;
     border-top:1px solid rgba(206, 160, 68, 0.15);
-    
   }
   .redes-lista .rede-item:last-child{ border-bottom:1px solid rgba(24, 15, 15, 0.15); }
   .rede-nome{
@@ -559,6 +579,25 @@
       gap:40px;
     }
     .cta-final h2{ margin-bottom:0; }
+  }
+
+  /* ------------------------------------------------------------
+     TELAS PEQUENAS (celular) — espaçamento mais compacto
+     ------------------------------------------------------------ */
+  @media (max-width:479px){
+    :root{ --gutter:18px; }
+    section{ padding:56px 0; }
+    .hero{ padding-top:80px; }
+    .hero-top{ padding-bottom:20px; }
+    .hero h1{ font-size:clamp(2.2rem,13vw,3.2rem); }
+    .hero-bottom{ padding-top:20px; padding-bottom:40px; }
+    .hero-bottom p{ max-width:100%; font-size:14px; }
+    .cta{ padding:13px 20px; font-size:13px; }
+    .section-head{ padding-bottom:28px; }
+    .cta-final{ padding-top:64px; padding-bottom:64px; }
+    .cta-final h2{ max-width:100%; }
+    .marca-layout{ gap:24px; }
+    .produtos-grid{ gap:32px 16px; }
   }
 
 </style>
@@ -713,14 +752,21 @@
      - nome, preco (opcional) e link seguem editáveis livremente.
      Adicionar ou remover um produto = editar apenas este array. */
   const CONFIG = {
-    // Mídia do hero — lista de imagens exibidas em sequência (fade).
-    // Se "link" tiver uma URL, a imagem fica clicável e redireciona
-    // ao ser clicada. A ordem no array é a ordem de exibição —
-    // a primeira aparece primeiro.
+    // Mídia do hero — lista de fotos e/ou vídeos exibidos em sequência
+    // (fade). A ordem no array é a ordem de exibição.
+    //   - tipo: 'imagem' (padrão, pode omitir) ou 'video'.
+    //   - imagem: caminho do arquivo em /assets (jpg/png para foto,
+    //     mp4 para vídeo).
+    //   - link: se tiver uma URL, o item fica clicável e redireciona
+    //     ao ser clicado. Deixe '' para não ter link.
     hero: {
       imagens: [
         { imagem:'assets/hero-promo.jpg', link:'https://instagram.com/ilime.ve' },
+        { tipo:'video', imagem:'assets/hero-video.mp4', link:'' },
         { imagem:'assets/photo-01.jpg', link:'' },
+        { imagem:'assets/hero-promo-2.jpg', link:'' },
+        { imagem:'assets/hero-promo-3.jpg', link:'' },
+        { imagem:'assets/hero-promo-4.jpg', link:'' },
       ]
     },
 
@@ -773,15 +819,18 @@
 
     itens.forEach((item, i) => {
       const slide = document.createElement('div');
+      const isVideo = item.tipo === 'video';
       slide.className = 'carrossel-slide' + (i === 0 ? ' ativo' : '');
       slide.setAttribute('data-file', item.imagem);
 
-      const img = `<img src="${item.imagem}" alt="Campanha ILIME">`;
+      const midia = isVideo
+        ? `<video src="${item.imagem}" autoplay muted loop playsinline></video>`
+        : `<img src="${item.imagem}" alt="Campanha ILIME">`;
       slide.innerHTML = item.link
-        ? `<a href="${item.link}" target="_blank" rel="noopener" aria-label="Ver mais">${img}</a>`
-        : img;
+        ? `<a href="${item.link}" target="_blank" rel="noopener" aria-label="Ver mais">${midia}</a>`
+        : midia;
 
-      slide.querySelector('img').addEventListener('error', function(){
+      slide.querySelector(isVideo ? 'video' : 'img').addEventListener('error', function(){
         slide.classList.add('placeholder');
         this.closest('a') ? this.closest('a').remove() : this.remove();
       });
@@ -836,7 +885,7 @@
       return box;
     }
 
-    // Produto ACTIVE com 2+ imagens: carrossel com dots e swipe.
+    // Produto ACTIVE com 2+ imagens: carrossel com dots, flechas e swipe.
     const carrossel = document.createElement('div');
     carrossel.className = 'carrossel';
     carrossel.innerHTML = `
@@ -846,6 +895,8 @@
           <img src="${img}" alt="${p.nome}">
         </div>
       `).join('')}
+      <button type="button" class="carrossel-arrow prev" aria-label="Foto anterior de ${p.nome}">‹</button>
+      <button type="button" class="carrossel-arrow next" aria-label="Próxima foto de ${p.nome}">›</button>
       <div class="carrossel-dots">
         ${imagens.map((_, i) => `<button data-i="${i}" class="${i===0?'ativo':''}" aria-label="Foto ${i+1} de ${p.nome}"></button>`).join('')}
       </div>
@@ -868,6 +919,8 @@
       dots.forEach((d, di) => d.classList.toggle('ativo', di === indice));
     }
     dots.forEach(d => d.addEventListener('click', () => irPara(Number(d.dataset.i))));
+    carrossel.querySelector('.carrossel-arrow.prev').addEventListener('click', () => irPara(indice - 1));
+    carrossel.querySelector('.carrossel-arrow.next').addEventListener('click', () => irPara(indice + 1));
 
     let startX = 0;
     carrossel.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, { passive:true });
