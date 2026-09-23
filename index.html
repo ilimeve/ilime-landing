@@ -756,12 +756,15 @@
     // (fade). A ordem no array é a ordem de exibição.
     //   - tipo: 'imagem' (padrão, pode omitir) ou 'video'.
     //   - imagem: caminho do arquivo em /assets (jpg/png para foto,
-    //     mp4 para vídeo).
+    //     mp4 para vídeo). Usada em telas >= 760px, e também em
+    //     qualquer tamanho quando "mobile" não for definido.
+    //   - mobile: opcional — caminho de uma imagem alternativa usada
+    //     só em telas <= 759px. Não se aplica a itens de vídeo.
     //   - link: se tiver uma URL, o item fica clicável e redireciona
     //     ao ser clicado. Deixe '' para não ter link.
     hero: {
       imagens: [
-        { imagem:'assets/hero-promo.jpg', link:'https://instagram.com/ilime.ve' },
+        { imagem:'assets/hero-promo.jpg', mobile:'assets/hero-promo-mobile.jpg', link:'https://instagram.com/ilime.ve' },
         { tipo:'video', imagem:'assets/hero-video.mp4', link:'' },
         { imagem:'assets/photo-01.jpg', link:'' },
         { imagem:'assets/hero-promo-2.jpg', link:'' },
@@ -825,7 +828,9 @@
 
       const midia = isVideo
         ? `<video src="${item.imagem}" autoplay muted loop playsinline></video>`
-        : `<img src="${item.imagem}" alt="Campanha ILIME">`;
+        : (item.mobile
+            ? `<picture><source media="(max-width:759px)" srcset="${item.mobile}"><img src="${item.imagem}" alt="Campanha ILIME"></picture>`
+            : `<img src="${item.imagem}" alt="Campanha ILIME">`);
       slide.innerHTML = item.link
         ? `<a href="${item.link}" target="_blank" rel="noopener" aria-label="Ver mais">${midia}</a>`
         : midia;
